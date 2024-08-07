@@ -15,12 +15,12 @@ white = (255, 255, 255)
 
 # 이미지 로드
 # 파일 위치를 코드랑 같은 폴더 안일 때
-# blue_image = pygame.image.load(r"C:\Users\USER\OneDrive - yjc.ac.kr\바탕 화면\mymy_prgrm\Programming\YJU_GSC\Summer_vacation\Class_B\Pygame\8.5.Mon\blue_rect.png")
-# red_image = pygame.image.load(r"C:\Users\USER\OneDrive - yjc.ac.kr\바탕 화면\mymy_prgrm\Programming\YJU_GSC\Summer_vacation\Class_B\Pygame\8.5.Mon\red_rect.png")
+blue_image = pygame.image.load(r"C:\Users\USER\OneDrive - yjc.ac.kr\바탕 화면\mymy_prgrm\Programming\YJU_GSC\Summer_vacation\Class_B\Pygame\8.5.Mon\blue_rect.png")
+red_image = pygame.image.load(r"C:\Users\USER\OneDrive - yjc.ac.kr\바탕 화면\mymy_prgrm\Programming\YJU_GSC\Summer_vacation\Class_B\Pygame\8.5.Mon\red_rect.png")
 
 # 파일 위치를 'mymy_prgrm'에 저장했을 때
-blue_image = pygame.image.load("blue_rect.png")
-red_image = pygame.image.load("red_rect.png")
+# blue_image = pygame.image.load("blue_rect.png")
+# red_image = pygame.image.load("red_rect.png")
 
 # 이미지 초기 위치 설정
 blue_rect = blue_image.get_rect()
@@ -50,13 +50,13 @@ while running: # 이벤트 처리
     if keys[pygame.K_DOWN]:
         blue_rect.y += speed
     if keys[pygame.K_a]:
-        blue_rect.x -= speed
+        red_rect.x -= speed
     if keys[pygame.K_d]:
-        blue_rect.x += speed
+        red_rect.x += speed
     if keys[pygame.K_w]:
-        blue_rect.y -= speed
+        red_rect.y -= speed
     if keys[pygame.K_s]:
-        blue_rect.y += speed
+        red_rect.y += speed
 
     # 화면 흰색 채우기
     screen.fill(white)
