@@ -104,4 +104,26 @@ while running:
         del items[item_index]
 
     # 모든 아이템 수집 시 게임 종료
-    
+    if not items:
+        print("모든 아이템을 수집했습니다! 승리!")
+        running = False
+
+    # 화면 초기화
+    screen.fill(WHITE)
+
+    # 장애물 그리기
+    for obs in obstacles:
+        pygame.draw.rect(screen, BLUE, obs)
+
+    # 아이템 그리기
+    for item in items:
+        pygame.draw.rect(screen, YELLOW, item)
+
+    # 이동하는 Rect 그리기
+    pygame.draw.rect(screen, RED, moving_rect)
+
+    # 화면 업데이트
+    pygame.display.flip()
+
+# Pygame 종료
+pygame.quit()
