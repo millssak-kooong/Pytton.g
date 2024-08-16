@@ -40,9 +40,8 @@ def feed():
         feed_clr = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         feed_x = random.randint(feed_r - 1, screen_w - 1 - feed_r)
         feed_y = random.randint(feed_r - 1, screen_h - 1 - feed_r)
-        list_feed.append(feed)
         feed = pygame.draw.circle(screen, feed_clr, (feed_x, feed_y), feed_r)
-        
+        list_feed.append(feed)
 
 # -------------- Net
 net_radius = 20
@@ -94,8 +93,8 @@ def start_direction():
 direction = start_direction()
 
 # -------------- Event
-# score(feed_amount)
-# feed()
+score(feed_amount)
+feed()
 running = True
 while running:
     for event in pygame.event.get():
@@ -115,23 +114,24 @@ while running:
     
     net_x, net_y = handle(direction, net_x, net_y, speed)
 
+    
 
 
-지렁이 게임에서 먹이를 랜덤으로 여러개 한 번에 보여주고 모두 먹을 때까지 하나씩 먹어 나가는 코드
 
     # Out of screen
-    if (net_x - net_radius) < 0 or (net_x - net_radius) > (screen_w - 1) or (net_y - net_radius) < 0 or (net_y - net_radius) > (screen_h - 1):
+    if (net_x - net_radius) < 0 or (net_x + net_radius) > (screen_w - 1) or (net_y - net_radius) < 0 or (net_y + net_radius) > (screen_h - 1):
         running = False
-
+        
     # Ensure the snake stays within the window boundaries
     # net_x = max(0, min(net_x, screen_w - 10))
     # net_y = max(0, min(net_y, screen_h - 10))
-
+    
     
     list_net.append((net_x, net_y))
     if len(list_net) > 1:
         list_net.pop(0)
-    
+        
+
     # if direction == 'right':
     #     net_x += speed
     # elif direction == 'left':
@@ -141,14 +141,15 @@ while running:
     # elif direction == 'down':
     #     net_y += speed
     
-    screen.fill(white)
-    score(feed_amount)
+    # screen.fill(white)
+    # score(feed_amount)
     # feed()
+
 
     for _ in list_net:
         pygame.draw.circle(screen, (0, 0, 0), (_[0], _[1]), net_radius) # Net
     
     pygame.display.flip() # 메모리에 그려 놓고 마지막에 화면에 표현
-    clock.tick(20)
+    clock.tick(60)
 
 pygame.quit() # 종료
