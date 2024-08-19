@@ -8,8 +8,8 @@ import pygame
 pygame.init()
 
 # -------------- Display
-screen_w = 800 # 3440 # 2048
-screen_h = 600 # 1440 # 1080
+screen_w = 800 # 3440 # 2048 # 1920
+screen_h = 600 # 1440 # 1080 # 1080
 screen_center = ((screen_w - 1) // 2, (screen_h - 1) // 2)
 screen = pygame.display.set_mode((screen_w, screen_h))
 white = (255, 255, 255)
@@ -44,12 +44,11 @@ def feed():
         list_feed.append(feed)
 
 # -------------- Net
-net_radius = 20
 net_x, net_y = (screen_w - 1) // 2, (screen_h - 1) // 2
 direction = 'right'
 list_net = [(net_x, net_y)]
 
-def handle(direction, net_x, net_y, speed):
+def handle(direction, net_x, net_y, speed): # Move
     if direction == 'right':
             net_x += speed
     elif direction == 'left':
@@ -71,15 +70,19 @@ def start_direction():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     direction = 'left'
+                    screen.fill(white)
                     play = False
                 elif event.key == pygame.K_RIGHT:
                     direction = 'right'
+                    screen.fill(white)
                     play = False
                 elif event.key == pygame.K_UP:
                     direction = 'up'
+                    screen.fill(white)
                     play = False
                 elif event.key == pygame.K_DOWN:
                     direction = 'down'
+                    screen.fill(white)
                     play = False
         # Display instruction
         screen.fill(white)
@@ -89,12 +92,16 @@ def start_direction():
         pygame.display.update()
     return direction
 
-# Get the initial direction from the player
-direction = start_direction()
+net_rect_side = 20
+net_rect_clr = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+net_rect = pygame.Rect(net_x, net_y, net_rect_side, net_rect_side)
+# pygame.draw.rect(screen, net_rect_clr, net_rect)
+
 
 # -------------- Event
+direction = start_direction() # First direction to move
 score(feed_amount)
-feed()
+feed_print = feed()
 running = True
 while running:
     for event in pygame.event.get():
@@ -114,17 +121,15 @@ while running:
     
     net_x, net_y = handle(direction, net_x, net_y, speed)
 
-    
-
-
+    # 화면 밖에 나가지 않도록 하는 코드
+    # net_x = max(net_radius, min(net_x, screen_w - 20))
+    # net_y = max(20, min(net_y, screen_h - 20))
 
     # Out of screen
-    if (net_x - net_radius) < 0 or (net_x + net_radius) > (screen_w - 1) or (net_y - net_radius) < 0 or (net_y + net_radius) > (screen_h - 1):
+    if net_x < 0 or (net_x + net_rect_side) > (screen_w - 1) or net_y < 0 or (net_y + net_rect_side) > (screen_h - 1):
         running = False
         
-    # Ensure the snake stays within the window boundaries
-    # net_x = max(0, min(net_x, screen_w - 10))
-    # net_y = max(0, min(net_y, screen_h - 10))
+    
     
     
     list_net.append((net_x, net_y))
@@ -141,15 +146,16 @@ while running:
     # elif direction == 'down':
     #     net_y += speed
     
-    # screen.fill(white)
-    # score(feed_amount)
-    # feed()
+    screen.fill(white)
+    score(feed_amount)
+    feed()
 
 
     for _ in list_net:
-        pygame.draw.circle(screen, (0, 0, 0), (_[0], _[1]), net_radius) # Net
+        # pygame.draw.circle(screen, (0, 0, 0), (_[0], _[1]), net_radius) # Net
+        pygame.draw.rect(screen, net_rect_clr, [_[0], _[1], net_rect_side, net_rect_side])
     
     pygame.display.flip() # 메모리에 그려 놓고 마지막에 화면에 표현
-    clock.tick(60)
+    clock.tick(30)
 
 pygame.quit() # 종료

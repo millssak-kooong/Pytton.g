@@ -1,123 +1,141 @@
-import pygame
 import random
+import pygame
 
-# 초기화
+# -------------- Initialize
 pygame.init()
 
-# 색상 설정
+# -------------- Display
+screen_w = 800
+screen_h = 600
+screen_center = ((screen_w - 1) // 2, (screen_h - 1) // 2)
+screen = pygame.display.set_mode((screen_w, screen_h))
 white = (255, 255, 255)
-yellow = (255, 255, 102)
-black = (0, 0, 0)
-red = (213, 50, 80)
-green = (0, 255, 0)
-blue = (50, 153, 213)
+screen.fill(white)
+pygame.display.set_caption("Jellyfish")
 
-# 디스플레이 크기 설정
-dis_width = 800
-dis_height = 600
-
-dis = pygame.display.set_mode((dis_width, dis_height))
-pygame.display.set_caption('Snake Game by ChatGPT')
-
+# -------------- Speed
 clock = pygame.time.Clock()
+fps = 30
+speed = 10
 
-snake_block = 10  # 원의 반지름 크기
-snake_speed = 15
+# -------------- Score
+def score(score):
+    score_font = pygame.font.SysFont('comicsansms', 30)
+    value = score_font.render(f"Last egg {score}", True, (0, 0, 0))
+    screen.blit(value, [0, 0])
 
-font_style = pygame.font.SysFont(None, 50)
-score_font = pygame.font.SysFont(None, 35)
+# -------------- Feed
+list_feed = []
+feed_amount = random.randint(5, 10)  # 한번에 그려질 먹이의 개수
 
-def Your_score(score):
-    value = score_font.render(f"Your Score: {score}", True, white)
-    dis.blit(value, [0, 0])
+def generate_feed():
+    global list_feed
+    list_feed = []  # 초기화
+    for _ in range(feed_amount):
+        feed_r = random.randint(5, 10)
+        feed_clr = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        feed_x = random.randint(feed_r, screen_w - feed_r)
+        feed_y = random.randint(feed_r, screen_h - feed_r)
+        list_feed.append((feed_x, feed_y, feed_r, feed_clr))
 
-def our_snake(snake_block, snake_list):
-    for x in snake_list:
-        pygame.draw.circle(dis, green, (x[0], x[1]), snake_block)
+def draw_feed():
+    for feed in list_feed:
+        pygame.draw.circle(screen, feed[3], (feed[0], feed[1]), feed[2])
 
-def message(msg, color):
-    mesg = font_style.render(msg, True, color)
-    dis.blit(mesg, [dis_width / 6, dis_height / 3])
+# -------------- Net (Snake)
+net_radius = 20
+net_x, net_y = screen_center
+direction = 'right'
+list_net = [(net_x, net_y)]
 
-def gameLoop():
-    game_over = False
-    game_close = False
+def handle(direction, net_x, net_y, speed): # Move
+    if direction == 'right':
+        net_x += speed
+    elif direction == 'left':
+        net_x -= speed
+    elif direction == 'up':
+        net_y -= speed
+    elif direction == 'down':
+        net_y += speed
+    return net_x, net_y
 
-    x1 = dis_width / 2
-    y1 = dis_height / 2
-
-    x1_change = 0
-    y1_change = 0
-
-    snake_List = []
-    Length_of_snake = 1
-
-    foodx = round(random.randrange(0, dis_width - snake_block * 2) / 10.0) * 10.0 + snake_block
-    foody = round(random.randrange(0, dis_height - snake_block * 2) / 10.0) * 10.0 + snake_block
-
-    while not game_over:
-
-        while game_close:
-            dis.fill(black)
-            message("You Lost! Press Q-Quit or C-Play Again", red)
-            Your_score(Length_of_snake - 1)
-            pygame.display.update()
-
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        game_over = True
-                        game_close = False
-                    if event.key == pygame.K_c:
-                        gameLoop()
-
+def start_direction():
+    direction = None
+    play = True
+    while play:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_over = True
-            if event.type == pygame.KEYDOWN:
+                pygame.quit()
+                return
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    x1_change = -snake_block * 2
-                    y1_change = 0
+                    direction = 'left'
+                    screen.fill(white)
+                    play = False
                 elif event.key == pygame.K_RIGHT:
-                    x1_change = snake_block * 2
-                    y1_change = 0
+                    direction = 'right'
+                    screen.fill(white)
+                    play = False
                 elif event.key == pygame.K_UP:
-                    y1_change = -snake_block * 2
-                    x1_change = 0
+                    direction = 'up'
+                    screen.fill(white)
+                    play = False
                 elif event.key == pygame.K_DOWN:
-                    y1_change = snake_block * 2
-                    x1_change = 0
+                    direction = 'down'
+                    screen.fill(white)
+                    play = False
 
-        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
-            game_close = True
-        x1 += x1_change
-        y1 += y1_change
-        dis.fill(black)
-        pygame.draw.circle(dis, blue, (foodx, foody), snake_block)
-        snake_Head = []
-        snake_Head.append(x1)
-        snake_Head.append(y1)
-        snake_List.append(snake_Head)
-        if len(snake_List) > Length_of_snake:
-            del snake_List[0]
-
-        for x in snake_List[:-1]:
-            if x == snake_Head:
-                game_close = True
-
-        our_snake(snake_block, snake_List)
-        Your_score(Length_of_snake - 1)
-
+        # Display instruction
+        screen.fill(white)
+        font = pygame.font.SysFont('papyrus', 40)
+        message = font.render("Press an arrow key to start", True, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+        screen.blit(message, ((screen_w - 1) // 2 - 210, (screen_h - 1) // 2 - 40))
         pygame.display.update()
+    return direction
 
-        if (x1 - foodx) ** 2 + (y1 - foody) ** 2 < (snake_block * 2) ** 2:
-            foodx = round(random.randrange(0, dis_width - snake_block * 2) / 10.0) * 10.0 + snake_block
-            foody = round(random.randrange(0, dis_height - snake_block * 2) / 10.0) * 10.0 + snake_block
-            Length_of_snake += 1
+# Generate feed once at the start
+generate_feed()
 
-        clock.tick(snake_speed)
+# -------------- Event
+direction = start_direction() # First direction to move
+score(feed_amount)
+running = True
 
-    pygame.quit()
-    quit()
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT and direction != 'right':
+                direction = 'left'
+            elif event.key == pygame.K_RIGHT and direction != 'left':
+                direction = 'right'
+            elif event.key == pygame.K_UP and direction != 'down':
+                direction = 'up'
+            elif event.key == pygame.K_DOWN and direction != 'up':
+                direction = 'down'
+    
+    net_x, net_y = handle(direction, net_x, net_y, speed)
 
-gameLoop()
+    # 화면 밖으로 나가지 않도록 처리
+    net_x = max(0, min(net_x, screen_w - net_radius))
+    net_y = max(0, min(net_y, screen_h - net_radius))
+
+    list_net.append((net_x, net_y))
+    if len(list_net) > 10:  # 뱀의 길이를 10으로 설정
+        list_net.pop(0)
+
+    # 화면을 지우고 다시 그리기
+    screen.fill(white)
+    score(feed_amount)
+    draw_feed()  # 유지된 먹이 위치를 그리기
+
+    # 뱀 그리기
+    for segment in list_net:
+        pygame.draw.rect(screen, (0, 0, 0), [segment[0], segment[1], net_radius, net_radius])
+
+    pygame.display.flip()
+    clock.tick(fps)
+
+pygame.quit()
