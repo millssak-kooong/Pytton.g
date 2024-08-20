@@ -89,7 +89,8 @@ def start_direction():
         screen.fill(white)
         font = pygame.font.SysFont('papyrus', 40)
         message = font.render("Press an arrow key to start", True, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-        screen.blit(message, ((screen_w - 1) // 2 - 210, (screen_h - 1) // 2 - 40))
+        message_rect = message.get_rect(center = ((screen_w - 1) // 2, (screen_h - 1) // 2))
+        screen.blit(message, message_rect)
         pygame.display.update()
     return direction
 

@@ -22,9 +22,6 @@ fps = 30
 speed = 10
 delta_time = clock.tick(fps) / 1000
 
-# -------------- Direction
-# direction = (['left', 'right', 'up', 'down'])
-
 # -------------- Score
 def score(score):
     score_font = pygame.font.SysFont('comicsansms', 30)
@@ -35,28 +32,37 @@ def score(score):
 list_feed = []
 feed_amount = random.randint(1, 100)
 def feed():
+    global list_feed
+    list_feed = []
     for _ in range(feed_amount):
         feed_r = random.randint(1, 10)
         feed_clr = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         feed_x = random.randint(feed_r - 1, screen_w - 1 - feed_r)
         feed_y = random.randint(feed_r - 1, screen_h - 1 - feed_r)
-        feed = pygame.draw.circle(screen, feed_clr, (feed_x, feed_y), feed_r)
-        list_feed.append(feed)
+        list_feed.append((feed_x, feed_y, feed_clr, feed_r))
+
+def feed_draw():
+     for _ in list_feed:
+        pygame.draw.circle(screen, _[2], (_[0], _[1]), _[3])
 
 # -------------- Net
+net_rect_side = 20
+net_rect_clr = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 net_x, net_y = (screen_w - 1) // 2, (screen_h - 1) // 2
-direction = 'right'
+# net_rect = pygame.Rect(net_x, net_y, net_rect_side, net_rect_side)
 list_net = [(net_x, net_y)]
+direction = 'right'
+
 
 def handle(direction, net_x, net_y, speed): # Move
     if direction == 'right':
-            net_x += speed
+        net_x += speed
     elif direction == 'left':
-            net_x -= speed
+        net_x -= speed
     elif direction == 'up':
-            net_y -= speed
+        net_y -= speed
     elif direction == 'down':
-            net_y += speed
+        net_y += speed
     return net_x, net_y
 
 def start_direction():
@@ -88,20 +94,17 @@ def start_direction():
         screen.fill(white)
         font = pygame.font.SysFont('papyrus', 40)
         message = font.render("Press an arrow key to start", True, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-        screen.blit(message, ((screen_w - 1) // 2 - 210, (screen_h - 1) // 2 - 40))
+        message_rect = message.get_rect(center = ((screen_w - 1) // 2, (screen_h - 1) // 2))
+        screen.blit(message, message_rect)
         pygame.display.update()
     return direction
 
-net_rect_side = 20
-net_rect_clr = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-net_rect = pygame.Rect(net_x, net_y, net_rect_side, net_rect_side)
-# pygame.draw.rect(screen, net_rect_clr, net_rect)
-
+feed()
 
 # -------------- Event
 direction = start_direction() # First direction to move
 score(feed_amount)
-feed_print = feed()
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -128,31 +131,17 @@ while running:
     # Out of screen
     if net_x < 0 or (net_x + net_rect_side) > (screen_w - 1) or net_y < 0 or (net_y + net_rect_side) > (screen_h - 1):
         running = False
-        
-    
-    
-    
+
+    # Not to draw trace of net        
     list_net.append((net_x, net_y))
     if len(list_net) > 1:
         list_net.pop(0)
-        
-
-    # if direction == 'right':
-    #     net_x += speed
-    # elif direction == 'left':
-    #     net_x -= speed
-    # elif direction == 'up':
-    #     net_y -= speed
-    # elif direction == 'down':
-    #     net_y += speed
     
     screen.fill(white)
     score(feed_amount)
-    feed()
-
+    feed_draw()
 
     for _ in list_net:
-        # pygame.draw.circle(screen, (0, 0, 0), (_[0], _[1]), net_radius) # Net
         pygame.draw.rect(screen, net_rect_clr, [_[0], _[1], net_rect_side, net_rect_side])
     
     pygame.display.flip() # 메모리에 그려 놓고 마지막에 화면에 표현
