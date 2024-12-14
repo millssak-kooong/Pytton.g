@@ -24,9 +24,9 @@ def camera_processing():
     print("'t' 키를 눌러 촬영을 시작/중지할 수 있습니다.")
     print("'q' 키를 누르면 종료됩니다.")
 
-    frame_count = 0
-    start_time = time.time()
     capturing = False  # 촬영 상태를 나타내는 변수
+    interval = 0.1  # 사진 촬영 간격 (초)
+    next_capture_time = time.time()  # 다음 사진 촬영 시간 초기화
 
     while True:
         ret, frame = cap.read()
@@ -37,17 +37,12 @@ def camera_processing():
         current_time = time.time()
 
         # 촬영이 활성화된 경우에만 사진 저장
-        if capturing and frame_count < 10:
+        if capturing and current_time >= next_capture_time:
             timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f')[:-3]  # 밀리초까지 저장
             filename = f"{save_directory}/photo_{timestamp}.jpg"
             cv2.imwrite(filename, frame)
-            frame_count += 1
             print(f"사진이 저장되었습니다: {filename}")
-
-        # 1초가 지나면 frame_count를 초기화
-        if capturing and current_time - start_time >= 1:
-            frame_count = 0
-            start_time = current_time
+            next_capture_time += interval  # 다음 촬영 시간을 업데이트
 
         cv2.imshow('Live Feed', frame)
 
@@ -59,6 +54,7 @@ def camera_processing():
             capturing = not capturing  # 촬영 상태 전환
             if capturing:
                 print("촬영 시작")
+                next_capture_time = time.time()  # 현재 시간으로 초기화
             else:
                 print("촬영 중지")
 
@@ -86,8 +82,7 @@ def motor_control():
     def set_servo_angle(angle):
         duty_cycle = 2 + (angle / 18)
         servo.ChangeDutyCycle(duty_cycle)
-        time.sleep(0.1)
-        servo.ChangeDutyCycle(0)
+        time.sleep(0.05)  # 응답 속도를 줄여 부드럽게 조향
 
     def set_dc_motor(speed, direction):
         if direction == "forward":
@@ -116,11 +111,13 @@ def motor_control():
 
             if keyboard.is_pressed('a'):
                 print("좌회전 중")
-                current_servo_angle = max(0, current_servo_angle - 5)
+                target_angle = max(15, current_servo_angle - 5)  # 좌측 방향으로 5도씩 변경
+                current_servo_angle = target_angle
                 set_servo_angle(current_servo_angle)
             elif keyboard.is_pressed('d'):
                 print("우회전 중")
-                current_servo_angle = min(180, current_servo_angle + 5)
+                target_angle = min(165, current_servo_angle + 5)  # 우측 방향으로 5도씩 변경
+                current_servo_angle = target_angle
                 set_servo_angle(current_servo_angle)
 
             if keyboard.is_pressed('q'):
